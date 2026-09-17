@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Konseling</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #dcd6ff, #c9e7ff);
+            padding: 25px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: auto;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.85);
+            border-radius: 25px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 25px rgba(70, 60, 120, 0.15);
+        }
+
+        .icon {
+            font-size: 50px;
+            margin-bottom: 8px;
+        }
+
+        .title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #5b4b9a;
+        }
+
+        .subtitle {
+            margin-top: 8px;
+            color: #777;
+            font-size: 16px;
+        }
+
+        /* LEVEL */
+        .level-box {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .level-btn {
+            border: none;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            background: white;
+            color: #555;
+            box-shadow: 0 5px 15px rgba(70, 60, 120, 0.12);
+            transition: 0.2s;
+        }
+
+        .level-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .level-btn.active {
+            background: #7564c4;
+            color: white;
+        }
+
+        /* STATUS */
+        .status {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            background: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            min-width: 130px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(70, 60, 120, 0.12);
+        }
+
+        .stat span {
+            font-size: 20px;
+        }
+
+        .stat b {
+            display: block;
+            font-size: 22px;
+            color: #5b4b9a;
+            margin-top: 3px;
+        }
+
+        .stat small {
+            color: #777;
+        }
+
+        /* GAME */
+        .game-box {
+            background: rgba(255, 255, 255, 0.85);
+            padding: 25px;
+            border-radius: 25px;
+            box-shadow: 0 8px 25px rgba(70, 60, 120, 0.15);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 750px;
+            margin: auto;
+        }
+
+        /* CARD */
+        .card {
+            height: 130px;
+            perspective: 1000px;
+            cursor: pointer;
+        }
+
+        .card-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front,
+        .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* BAGIAN DEPAN */
+        .card-front {
+            background: linear-gradient(135deg, #7564c4, #8e7bd5);
+            color: white;
+            font-size: 42px;
+            box-shadow: 0 5px 12px rgba(70, 60, 120, 0.2);
+        }
+
+        /* BAGIAN BELAKANG */
+        .card-back {
+            background: white;
+            transform: rotateY(180deg);
+            flex-direction: column;
+            border: 3px solid #c9c0ff;
+            box-shadow: 0 5px 12px rgba(70, 60, 120, 0.15);
+        }
+
+        .card-icon {
+            font-size: 42px;
+            margin-bottom: 7px;
+        }
+
+        .card-name {
+            font-size: 14px;
+            font-weight: bold;
+            color: #5b4b9a;
+        }
+
+        .card.matched .card-back {
+            border: 3px solid #7bcf9b;
+            background: #edfff3;
+        }
+
+        /* BOTTOM */
+        .bottom {
+            text-align: center;
+            margin-top: 25px;
+        }
+
+        .combo {
+            min-height: 25px;
+            color: #7564c4;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .restart {
+            border: none;
+            background: #7564c4;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .restart:hover {
+            transform: scale(1.05);
+            background: #6251b0;
+        }
+
+        /* MODAL */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(40, 30, 80, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 25px;
+            padding: 35px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-icon {
+            font-size: 55px;
+            margin-bottom: 10px;
+        }
+
+        .modal h2 {
+            color: #5b4b9a;
+            margin-bottom: 10px;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .modal button {
+            border: none;
+            background: #7564c4;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 700px) {
+            body {
+                padding: 12px;
+            }
+
+            .title {
+                font-size: 25px;
+            }
+
+            .game-box {
+                padding: 15px;
+            }
+
+            .board {
+                gap: 8px;
+            }
+
+            .card {
+                height: 90px;
+            }
+
+            .card-front {
+                font-size: 30px;
+            }
+
+            .card-icon {
+                font-size: 28px;
+            }
+
+            .card-name {
+                font-size: 10px;
+            }
+
+            .stat {
+                min-width: 100px;
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- HEADER -->
+    <div class="header">
+        <div class="icon">🧠💬</div>
+        <div class="title">MEMORY KONSELING</div>
+        <div class="subtitle">
+            Temukan pasangan kartu konseling
+        </div>
+    </div>
+
+    <!-- LEVEL -->
+    <div class="level-box">
+        <button class="level-btn active"
+                id="easyBtn"
+                onclick="changeLevel('easy')">
+            🟢 EASY
+        </button>
+
+        <button class="level-btn"
+                id="mediumBtn"
+                onclick="changeLevel('medium')">
+            🟡 MEDIUM
+        </button>
+
+        <button class="level-btn"
+                id="hardBtn"
+                onclick="changeLevel('hard')">
+            🔴 HARD
+        </button>
+    </div>
+
+    <!-- STATUS -->
+    <div class="status">
+
+        <div class="stat">
+            <span>🏆</span>
+            <b id="score">0</b>
+            <small>Score</small>
+        </div>
+
+        <div class="stat">
+            <span>🧩</span>
+            <b id="pairs">0/4</b>
+            <small>Pairs</small>
+        </div>
+
+        <div class="stat">
+            <span>🔥</span>
+            <b id="comboNumber">0</b>
+            <small>Combo</small>
+        </div>
+
+    </div>
+
+    <!-- GAME -->
+    <div class="game-box">
+
+        <div class="board" id="board"></div>
+
+        <div class="bottom">
+
+            <div class="combo" id="combo"></div>
+
+            <button class="restart" onclick="startGame()">
+                🔄 Main Lagi
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- MODAL -->
+<div class="overlay" id="overlay">
+
+    <div class="modal">
+
+        <div class="modal-icon" id="modalIcon">
+            🎉
+        </div>
+
+        <h2 id="modalTitle">
+            Berhasil!
+        </h2>
+
+        <p id="modalText">
+            Kamu berhasil menemukan semua pasangan.
+        </p>
+
+        <button onclick="closeModal()">
+            🎮 Main Lagi
+        </button>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    /* =========================
+       DATA KARTU KONSELING
+    ========================= */
+
+    const allCards = [
+
+        {
+            icon: "🧠",
+            name: "Mental"
+        },
+
+        {
+            icon: "💬",
+            name: "Komunikasi"
+        },
+
+        {
+            icon: "❤️",
+            name: "Dukungan"
+        },
+
+        {
+            icon: "🤝",
+            name: "Empati"
+        },
+
+        {
+            icon: "👂",
+            name: "Mendengar"
+        },
+
+        {
+            icon: "🌱",
+            name: "Self Care"
+        },
+
+        {
+            icon: "😊",
+            name: "Perasaan"
+        },
+
+        {
+            icon: "📝",
+            name: "Catatan"
+        },
+
+        {
+            icon: "🧑‍🏫",
+            name: "Konselor"
+        },
+
+        {
+            icon: "🗣️",
+            name: "Bercerita"
+        },
+
+        {
+            icon: "🫶",
+            name: "Peduli"
+        },
+
+        {
+            icon: "🌈",
+            name: "Harapan"
+        }
+
+    ];
+
+
+    /* =========================
+       LEVEL
+    ========================= */
+
+    const levels = {
+
+        easy: {
+            pairs: 4
+        },
+
+        medium: {
+            pairs: 8
+        },
+
+        hard: {
+            pairs: 12
+        }
+
+    };
+
+
+    /* =========================
+       VARIABLE GAME
+    ========================= */
+
+    let currentLevel = "easy";
+
+    let cards = [];
+
+    let firstCard = null;
+
+    let secondCard = null;
+
+    let locked = false;
+
+    let score = 0;
+
+    let pairs = 0;
+
+    let combo = 0;
+
+
+    /* =========================
+       GANTI LEVEL
+    ========================= */
+
+    function changeLevel(level) {
+
+        currentLevel = level;
+
+        document
+            .querySelectorAll(".level-btn")
+            .forEach(button => {
+                button.classList.remove("active");
+            });
+
+        if (level === "easy") {
+            document
+                .getElementById("easyBtn")
+                .classList.add("active");
+        }
+
+        if (level === "medium") {
+            document
+                .getElementById("mediumBtn")
+                .classList.add("active");
+        }
+
+        if (level === "hard") {
+            document
+                .getElementById("hardBtn")
+                .classList.add("active");
+        }
+
+        startGame();
+    }
+
+
+    /* =========================
+       MULAI GAME
+    ========================= */
+
+    function startGame() {
+
+        closeModal();
+
+        const settings = levels[currentLevel];
+
+        score = 0;
+
+        pairs = 0;
+
+        combo = 0;
+
+        firstCard = null;
+
+        secondCard = null;
+
+        locked = false;
+
+        createCards();
+
+        updateStatus();
+    }
+
+
+    /* =========================
+       BUAT KARTU
+    ========================= */
+
+    function createCards() {
+
+        const settings = levels[currentLevel];
+
+        const selectedCards =
+            allCards.slice(0, settings.pairs);
+
+        cards = [
+            ...selectedCards,
+            ...selectedCards
+        ];
+
+        shuffle(cards);
+
+        renderCards();
+    }
+
+
+    /* =========================
+       ACAK KARTU
+    ========================= */
+
+    function shuffle(array) {
+
+        for (
+            let i = array.length - 1;
+            i > 0;
+            i--
+        ) {
+
+            const j =
+                Math.floor(Math.random() * (i + 1));
+
+            [
+                array[i],
+                array[j]
+            ] =
+            [
+                array[j],
+                array[i]
+            ];
+
+        }
+
+    }
+
+
+    /* =========================
+       TAMPILKAN KARTU
+    ========================= */
+
+    function renderCards() {
+
+        const board =
+            document.getElementById("board");
+
+        board.innerHTML = "";
+
+        cards.forEach((cardData, index) => {
+
+            const card =
+                document.createElement("div");
+
+            card.className = "card";
+
+            card.dataset.name =
+                cardData.name;
+
+            card.innerHTML = `
+
+                <div class="card-inner">
+
+                    <div class="card-front">
+                        🧠
+                    </div>
+
+                    <div class="card-back">
+
+                        <div class="card-icon">
+                            ${cardData.icon}
+                        </div>
+
+                        <div class="card-name">
+                            ${cardData.name}
+                        </div>
+
+                    </div>
+
+                </div>
+
+            `;
+
+            card.addEventListener(
+                "click",
+                () => flipCard(card)
+            );
+
+            board.appendChild(card);
+
+        });
+
+    }
+
+
+    /* =========================
+       BALIK KARTU
+    ========================= */
+
+    function flipCard(card) {
+
+        if (locked) return;
+
+        if (card === firstCard) return;
+
+        if (card.classList.contains("matched")) {
+            return;
+        }
+
+        card.classList.add("flipped");
+
+        if (!firstCard) {
+
+            firstCard = card;
+
+            return;
+        }
+
+        secondCard = card;
+
+        checkMatch();
+    }
+
+
+    /* =========================
+       CEK PASANGAN
+    ========================= */
+
+    function checkMatch() {
+
+        locked = true;
+
+        const isMatch =
+            firstCard.dataset.name ===
+            secondCard.dataset.name;
+
+
+        if (isMatch) {
+
+            firstCard.classList.add("matched");
+
+            secondCard.classList.add("matched");
+
+            pairs++;
+
+            combo++;
+
+            score += 100 + (combo * 25);
+
+            updateStatus();
+
+            resetCards();
+
+            if (
+                pairs ===
+                levels[currentLevel].pairs
+            ) {
+
+                setTimeout(() => {
+                    winGame();
+                }, 500);
+
+            }
+
+        } else {
+
+            combo = 0;
+
+            updateStatus();
+
+            setTimeout(() => {
+
+                firstCard.classList.remove("flipped");
+
+                secondCard.classList.remove("flipped");
+
+                resetCards();
+
+            }, 800);
+
+        }
+
+    }
+
+
+    /* =========================
+       RESET KARTU
+    ========================= */
+
+    function resetCards() {
+
+        firstCard = null;
+
+        secondCard = null;
+
+        locked = false;
+
+    }
+
+
+    /* =========================
+       UPDATE STATUS
+    ========================= */
+
+    function updateStatus() {
+
+        document.getElementById("score")
+            .textContent = score;
+
+        document.getElementById("pairs")
+            .textContent =
+            `${pairs}/${levels[currentLevel].pairs}`;
+
+        document.getElementById("comboNumber")
+            .textContent = combo;
+
+
+        const comboText =
+            document.getElementById("combo");
+
+        if (combo >= 2) {
+
+            comboText.textContent =
+                `🔥 COMBO x${combo}!`;
+
+        } else {
+
+            comboText.textContent = "";
+
+        }
+
+    }
+
+
+    /* =========================
+       MENANG
+    ========================= */
+
+    function winGame() {
+
+        showModal(
+
+            "🎉",
+
+            "Kamu Berhasil!",
+
+            `Semua pasangan berhasil ditemukan!<br>
+             Score kamu: <b>${score}</b>`
+
+        );
+
+    }
+
+
+    /* =========================
+       MODAL
+    ========================= */
+
+    function showModal(
+        icon,
+        title,
+        text
+    ) {
+
+        document.getElementById("modalIcon")
+            .textContent = icon;
+
+        document.getElementById("modalTitle")
+            .textContent = title;
+
+        document.getElementById("modalText")
+            .innerHTML = text;
+
+        document.getElementById("overlay")
+            .classList.add("show");
+
+    }
+
+
+    function closeModal() {
+
+        document.getElementById("overlay")
+            .classList.remove("show");
+
+    }
+
+
+    /* =========================
+       JALANKAN GAME
+    ========================= */
+
+    startGame();
+
+</script>
+
+</body>
+</html>
